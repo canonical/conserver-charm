@@ -32,10 +32,10 @@ class ConserverCharm(ops.CharmBase):
     def _on_install(self, _):
         """Handle install event."""
         self.unit.status = ops.MaintenanceStatus("Installing conserver-server")
-        self.install_apt_packages(["conserver-server"])
+        self.install_apt_packages(["conserver-server", "ipmitool"])
 
     def install_apt_packages(self, packages: list):
-        """Simple wrapper around 'apt-get install -y"""
+        """Perform 'apt-get install -y."""
         try:
             apt.update()
             apt.add_package(packages)
