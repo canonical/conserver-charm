@@ -1,0 +1,21 @@
+name: Publish conserver charm
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - src/**
+      - lib/**
+  workflow_dispatch:
+
+jobs:
+  build-and-publish-charm:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upload charm to charmhub
+        uses: canonical/charming-actions/upload-charm@2.6.3
+        with:
+          credentials: "${{ secrets.CHARMHUB_TOKEN }}"
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          channel: "latest/edge"
