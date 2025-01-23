@@ -5,9 +5,9 @@ resource "juju_application" "conserver" {
   units = 1
 
   charm {
-    name     = "conserver"
-    base     = "ubuntu@22.04"
-    channel  = var.charm_channel
+    name    = "conserver"
+    base    = "ubuntu@22.04"
+    channel = var.charm_channel
   }
 
   config = {
