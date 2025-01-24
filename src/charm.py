@@ -34,6 +34,16 @@ class ConserverCharm(ops.CharmBase):
         self.unit.status = ops.MaintenanceStatus("Installing conserver-server")
         self.install_apt_packages(["conserver-server", "ipmitool"])
 
+        # Keep default port for incoming connections at 3109
+        # and set base port for established connections at 33000
+        server_config = "OPTS='-p 3109 -b 33000  '\nASROOT=\n"
+        try:
+            Path("/etc/conserver/server.conf").write_text(server_config)
+        except Exception as e:
+            logger.error("Failed to write server.conf: %s", str(e))
+            self.unit.status = ops.BlockedStatus("Failed to write server.conf")
+            return
+
     def install_apt_packages(self, packages: list):
         """Perform 'apt-get install -y."""
         try:
