@@ -1,18 +1,27 @@
 name: Publish conserver charm
+permissions: {}
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - src/**
       - lib/**
+      - charmcraft.yaml
+      - requirements.txt
   workflow_dispatch:
 
 jobs:
   build-and-publish-charm:
+    name: Build and Publish Charm
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      packages: write
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - name: Upload charm to charmhub
         uses: canonical/charming-actions/upload-charm@2.7.0
         with:
