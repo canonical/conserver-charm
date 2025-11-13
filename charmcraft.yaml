@@ -7,6 +7,9 @@ description: |
   service for connecting to serial consoles and allows multiple simultaneous
   users. See https://www.conserver.com/ for more details about Conserver itself.
 
+links:
+  issues: https://github.com/canonical/conserver-charm/issues
+  source: https://github.com/canonical/conserver-charm
 
 base: ubuntu@22.04
 platforms:
