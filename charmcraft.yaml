@@ -30,3 +30,8 @@ config:
         Base64 encoded contents of the passwd file.
       default: "IyBDb25zZXJ2ZXIgcGFzc3dkIGZpbGUKIyBGb3JtYXQ6IHVzZXJuYW1lOiQxJFkwWmpNbTJoJG9NWDVVeUxpMS95MFE5SVJXZjN2LzAKIyB5b3UgY2FuIGdlbmVyYXRlIHRoZSBoYXNoZWQgcGFzc3dvcmQgdXNpbmcgYG9wZW5zc2wgcGFzc3dkIC0xYAo="
       type: string
+
+parts:
+  conserver-charm:
+    plugin: charm
+    source: .
