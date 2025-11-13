@@ -6,7 +6,7 @@ type: charm
 title: Conserver Charm
 summary: Conserver Charm
 description: |
-  This JUJU charm deploys Conserver to a machine model. Conserver provides a
+  This charm deploys Conserver to a machine model. Conserver provides a
   service for connecting to serial consoles and allows multiple simultaneous
   users. See https://www.conserver.com/ for more details about Conserver itself.
 
