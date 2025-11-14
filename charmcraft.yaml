@@ -1,8 +1,5 @@
-# This file configures Charmcraft.
-# See https://juju.is/docs/sdk/charmcraft-config for guidance.
-
-name: conserver
 type: charm
+name: conserver
 title: Conserver Charm
 summary: Conserver Charm
 description: |
@@ -10,19 +7,18 @@ description: |
   service for connecting to serial consoles and allows multiple simultaneous
   users. See https://www.conserver.com/ for more details about Conserver itself.
 
-bases:
-  - build-on:
-    - name: ubuntu
-      channel: "22.04"
-    run-on:
-    - name: ubuntu
-      channel: "22.04"
+links:
+  issues: https://github.com/canonical/conserver-charm/issues
+  source: https://github.com/canonical/conserver-charm
 
+base: ubuntu@22.04
+platforms:
+  amd64:
 
-# This config section defines charm config options, and populates the Configure
-# tab on Charmhub.
-# More information on this section at https://juju.is/docs/sdk/charmcraft-yaml#heading--config
-# General configuration documentation: https://juju.is/docs/sdk/config
+charm-libs:
+  - lib: operator_libs_linux.apt
+    version: "0"
+
 config:
   options:
     config-file:
@@ -34,3 +30,8 @@ config:
         Base64 encoded contents of the passwd file.
       default: "IyBDb25zZXJ2ZXIgcGFzc3dkIGZpbGUKIyBGb3JtYXQ6IHVzZXJuYW1lOiQxJFkwWmpNbTJoJG9NWDVVeUxpMS95MFE5SVJXZjN2LzAKIyB5b3UgY2FuIGdlbmVyYXRlIHRoZSBoYXNoZWQgcGFzc3dvcmQgdXNpbmcgYG9wZW5zc2wgcGFzc3dkIC0xYAo="
       type: string
+
+parts:
+  conserver-charm:
+    plugin: charm
+    source: .
