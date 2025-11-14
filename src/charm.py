@@ -110,7 +110,8 @@ class ConserverCharm(ops.CharmBase):
                 ["systemctl", "is-active", "--quiet", "conserver-server"]
             )
             self.unit.status = ops.ActiveStatus()
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError as e:
+            logger.exception("Failed to start Conserver service: %s", e)
             self.unit.status = ops.BlockedStatus("Service failed to start")
 
 
