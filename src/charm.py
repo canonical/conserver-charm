@@ -16,6 +16,7 @@ from charmlibs import apt
 
 logger = logging.getLogger(__name__)
 
+SERVER_CONFIG = "/etc/conserver/server.conf"
 CONSERVER_CONFIG = "/etc/conserver/conserver.cf"
 CONSERVER_PASSWD = "/etc/conserver/conserver.passwd"
 
@@ -41,11 +42,10 @@ class ConserverCharm(ops.CharmBase):
         # and set base port for established connections at 33000
         server_config = "OPTS='-p 3109 -b 33000  '\nASROOT=\n"
         try:
-            Path("/etc/conserver/server.conf").write_text(server_config)
-        except Exception as e:
-            logger.error("Failed to write server.conf: %s", str(e))
+            Path(SERVER_CONFIG).write_text(server_config, encoding="utf-8")
+        except (OSError, UnicodeError) as e:
+            logger.exception("Failed to write server.conf: %s", e)
             self.unit.status = ops.BlockedStatus("Failed to write server.conf")
-            return
 
     def _on_config_changed(self, _):
         """Handle changes in configuration."""
