@@ -47,15 +47,12 @@ class ConserverCharm(ops.CharmBase):
     def install_apt_packages(self, packages: list):
         """Perform 'apt-get install -y."""
         try:
-            apt.update()
-            apt.add_package(packages)
-        except apt.PackageNotFoundError:
-            logger.error(
-                "a specified package not found in package cache or on system"
-            )
+            apt.add_package(packages, update_cache=True)
+        except apt.PackageNotFoundError as e:
+            logger.exception("Package(s) not found: %s", e)
             self.unit.status = ops.BlockedStatus("Failed to install packages")
-        except apt.PackageError:
-            logger.error("could not install package")
+        except apt.PackageError as e:
+            logger.exception("Failed to install package(s): %s", e)
             self.unit.status = ops.BlockedStatus("Failed to install packages")
 
     def _on_config_changed(self, _):
