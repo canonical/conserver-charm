@@ -9,12 +9,12 @@ import binascii
 import logging
 import os
 import pwd
-import subprocess
 from pathlib import Path
 from typing import Optional, cast
 
 import ops
 from charmlibs import apt
+from charms.operator_libs_linux.v1 import systemd
 
 logger = logging.getLogger(__name__)
 
@@ -90,12 +90,11 @@ class ConserverCharm(ops.CharmBase):
 
         # Restart service to apply changes
         try:
-            subprocess.check_call(["systemctl", "restart", "conserver-server"])
-        except subprocess.CalledProcessError as e:
-            logger.exception("Failed to restart Conserver service: %s", e)
-            self.unit.status = ops.BlockedStatus("Service failed to restart")
-        else:
-            self.unit.status = ops.ActiveStatus()
+            systemd.service_reload("conserver-server", restart_on_failure=True)
+            logger.info("Reloaded Conserver service successfully")
+        except systemd.SystemdError as e:
+            logger.exception("Failed to reload Conserver service: %s", e)
+        self.set_status()
 
     def _write_file(
         self, contents: str, path: Path, uid: int = 0, gid: int = 0, mode: int = 0o644
@@ -115,14 +114,37 @@ class ConserverCharm(ops.CharmBase):
     def _on_start(self, _):
         """Handle start event."""
         try:
-            # Ensure service is running
-            subprocess.check_call(
-                ["systemctl", "is-active", "--quiet", "conserver-server"]
-            )
+            systemd.service_enable("--now", "conserver-server")
+            logger.info("Enabled and started Conserver service successfully")
+        except systemd.SystemdError as e:
+            logger.exception("Failed to enable/start Conserver service: %s", e)
+        self.set_status()
+
+    def set_status(self):
+        """Calculate and set the unit status."""
+        config_file = self.config.get("config-file", "")
+        passwd_file = self.config.get("passwd-file", "")
+
+        if not config_file:
+            self.unit.status = ops.BlockedStatus("Missing config-file in config")
+            return
+        if config_file and self.conserver_cf is None:
+            self.unit.status = ops.BlockedStatus("Invalid value for config-file")
+            return
+
+        if not passwd_file:
+            self.unit.status = ops.BlockedStatus("Missing passwd-file in config")
+            return
+        if passwd_file and self.conserver_passwd is None:
+            self.unit.status = ops.BlockedStatus("Invalid value for passwd-file")
+            return
+
+        if systemd.service_running("conserver-server"):
             self.unit.status = ops.ActiveStatus()
-        except subprocess.CalledProcessError as e:
-            logger.exception("Failed to start Conserver service: %s", e)
-            self.unit.status = ops.BlockedStatus("Service failed to start")
+        elif systemd.service_failed("conserver-server"):
+            self.unit.status = ops.BlockedStatus("Conserver service has failed")
+        else:
+            self.unit.status = ops.MaintenanceStatus()
 
 
 if __name__ == "__main__":  # pragma: nocover
