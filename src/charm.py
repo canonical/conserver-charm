@@ -62,7 +62,7 @@ class ConserverCharm(ops.CharmBase):
         try:
             decoded_config = base64.b64decode(config_content).decode("utf-8")
         except binascii.Error as e:
-            logging.exception("Failed to decode config-file content: %s", e)
+            logger.exception("Failed to decode config-file content: %s", e)
             self.unit.status = ops.BlockedStatus("Invalid base64 in config-file")
             return
         try:
