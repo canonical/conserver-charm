@@ -11,6 +11,7 @@ import os
 import pwd
 import subprocess
 from pathlib import Path
+from typing import Optional, cast
 
 import ops
 from charmlibs import apt
@@ -33,6 +34,28 @@ class ConserverCharm(ops.CharmBase):
         self.framework.observe(self.on.config_changed, self._on_config_changed)
         self.framework.observe(self.on.start, self._on_start)
 
+    @property
+    def conserver_cf(self) -> Optional[str]:
+        """Return the conserver configuration from Juju config options, if any."""
+        if contents := cast(str, self.config.get("config-file")):
+            try:
+                return base64.b64decode(contents).decode("utf-8")
+            except binascii.Error as e:
+                logger.exception("Failed to decode config-file content: %s", e)
+                return None
+        return None
+
+    @property
+    def conserver_passwd(self) -> Optional[str]:
+        """Return the conserver password file from Juju config options, if any."""
+        if contents := cast(str, self.config.get("passwd-file")):
+            try:
+                return base64.b64decode(contents).decode("utf-8")
+            except binascii.Error as e:
+                logger.exception("Failed to decode passwd-file content: %s", e)
+                return None
+        return None
+
     def _on_install(self, _):
         """Handle install event."""
         self.unit.status = ops.MaintenanceStatus("Installing conserver-server")
@@ -52,54 +75,18 @@ class ConserverCharm(ops.CharmBase):
         """Handle changes in configuration."""
         self.unit.status = ops.MaintenanceStatus("Updating configuration")
 
-        # Update conserver.cf
-        try:
-            config_content = str(self.config["config-file"])
-        except KeyError:
-            logger.error("config-file not found in charm configuration")
-            self.unit.status = ops.BlockedStatus("Missing config-file in config")
-            return
-        try:
-            decoded_config = base64.b64decode(config_content).decode("utf-8")
-        except binascii.Error as e:
-            logger.exception("Failed to decode config-file content: %s", e)
-            self.unit.status = ops.BlockedStatus("Invalid base64 in config-file")
-            return
-        try:
-            Path(CONSERVER_CONFIG).write_text(decoded_config, encoding="utf-8")
-        except (OSError, UnicodeError) as e:
-            logger.exception("Failed to write conserver.cf: %s", e)
-            self.unit.status = ops.BlockedStatus("Failed to write conserver.cf")
-            return
+        conserver_cf = self.conserver_cf
+        if conserver_cf:
+            self._write_file(conserver_cf, Path(CONSERVER_CONFIG))
 
-        # Update conserver.passwd
-        try:
-            passwd_content = str(self.config["passwd-file"])
-        except KeyError:
-            logger.error("passwd-file not found in charm configuration")
-            self.unit.status = ops.BlockedStatus("Missing passwd-file in config")
-            return
-        try:
-            decoded_passwd = base64.b64decode(passwd_content).decode("utf-8")
-        except binascii.Error as e:
-            logger.exception("Failed to decode passwd-file content: %s", e)
-            self.unit.status = ops.BlockedStatus("Invalid base64 in passwd-file")
-            return
-        try:
-            Path(CONSERVER_PASSWD).write_text(decoded_passwd, encoding="utf-8")
-        except (OSError, UnicodeError) as e:
-            logger.exception("Failed to write conserver.passwd: %s", e)
-            self.unit.status = ops.BlockedStatus("Failed to write conserver.passwd")
-            return
-
-        # conserver.cf should be owned by root:root
-        os.chown(CONSERVER_CONFIG, 0, 0)
-        os.chmod(CONSERVER_CONFIG, 0o644)
-
-        # conserver.passwd should be owned by conservr:root
-        conservr_uid = pwd.getpwnam("conservr").pw_uid
-        os.chown(CONSERVER_PASSWD, conservr_uid, 0)
-        os.chmod(CONSERVER_PASSWD, 0o600)
+        conserver_passwd = self.conserver_passwd
+        if conserver_passwd:
+            self._write_file(
+                conserver_passwd,
+                Path(CONSERVER_PASSWD),
+                uid=pwd.getpwnam("conservr").pw_uid,
+                mode=0o600,
+            )
 
         # Restart service to apply changes
         try:
@@ -109,6 +96,21 @@ class ConserverCharm(ops.CharmBase):
             self.unit.status = ops.BlockedStatus("Service failed to restart")
         else:
             self.unit.status = ops.ActiveStatus()
+
+    def _write_file(
+        self, contents: str, path: Path, uid: int = 0, gid: int = 0, mode: int = 0o644
+    ):
+        """Write contents to a file."""
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(contents, encoding="utf-8")
+            logger.info("Wrote %s successfully", path.name)
+        except OSError as e:
+            logger.exception("Failed to write %s: %s", path.name, e)
+            return False
+        os.chown(path, uid, gid)
+        path.chmod(mode)
+        return True
 
     def _on_start(self, _):
         """Handle start event."""
