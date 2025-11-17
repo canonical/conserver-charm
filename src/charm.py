@@ -97,21 +97,6 @@ class ConserverCharm(ops.CharmBase):
             logger.exception("Failed to reload Conserver service: %s", e)
         self.set_status()
 
-    def _write_file(
-        self, contents: str, path: Path, uid: int = 0, gid: int = 0, mode: int = 0o644
-    ):
-        """Write contents to a file."""
-        try:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(contents, encoding="utf-8")
-            logger.info("Wrote %s successfully", path.name)
-        except OSError as e:
-            logger.exception("Failed to write %s: %s", path.name, e)
-            return False
-        os.chown(path, uid, gid)
-        path.chmod(mode)
-        return True
-
     def _on_start(self, _):
         """Handle start event."""
         try:
@@ -156,6 +141,22 @@ class ConserverCharm(ops.CharmBase):
             self.unit.status = ops.BlockedStatus("Conserver service has failed")
         else:
             self.unit.status = ops.MaintenanceStatus()
+
+    def _write_file(
+        self, contents: str, path: Path, uid: int = 0, gid: int = 0, mode: int = 0o644
+    ):
+        """Write contents to a file."""
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(contents, encoding="utf-8")
+            logger.info("Wrote %s successfully", path.name)
+        except OSError as e:
+            logger.exception("Failed to write %s: %s", path.name, e)
+            return False
+        os.chown(path, uid, gid)
+        path.chmod(mode)
+        return True
+
 
 
 if __name__ == "__main__":  # pragma: nocover
