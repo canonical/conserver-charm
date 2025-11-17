@@ -49,11 +49,6 @@ class ConserverCharm(ops.CharmBase):
         try:
             apt.update()
             apt.add_package(packages)
-        except apt.PackageNotFoundError:
-            logger.error(
-                "a specified package not found in package cache or on system"
-            )
-            self.unit.status = ops.BlockedStatus("Failed to install packages")
         except apt.PackageError:
             logger.error("could not install package")
             self.unit.status = ops.BlockedStatus("Failed to install packages")
