@@ -33,6 +33,7 @@ class ConserverCharm(ops.CharmBase):
         self.framework.observe(self.on.install, self._on_install)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
         self.framework.observe(self.on.start, self._on_start)
+        self.framework.observe(self.on.stop, self._on_stop)
 
     @property
     def conserver_cf(self) -> Optional[str]:
@@ -119,6 +120,16 @@ class ConserverCharm(ops.CharmBase):
         except systemd.SystemdError as e:
             logger.exception("Failed to enable/start Conserver service: %s", e)
         self.set_status()
+    
+    def _on_stop(self, _):
+        """Handle stop event."""
+        try:
+            systemd.service_disable("--now", "conserver-server")
+            logger.info("Disabled and stopped Conserver service successfully")
+        except systemd.SystemdError as e:
+            logger.exception("Failed to disable/stop Conserver service: %s", e)
+        self.conserver_deb.ensure(apt.PackageState.Absent)
+        self.ipmitool_deb.ensure(apt.PackageState.Absent)
 
     def set_status(self):
         """Calculate and set the unit status."""
