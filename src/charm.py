@@ -105,7 +105,7 @@ class ConserverCharm(ops.CharmBase):
         except systemd.SystemdError as e:
             logger.exception("Failed to enable/start Conserver service: %s", e)
         self.set_status()
-    
+
     def _on_stop(self, _):
         """Handle stop event."""
         try:
@@ -156,7 +156,6 @@ class ConserverCharm(ops.CharmBase):
         os.chown(path, uid, gid)
         path.chmod(mode)
         return True
-
 
 
 if __name__ == "__main__":  # pragma: nocover
