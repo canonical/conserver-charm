@@ -1,0 +1,26 @@
+name: Auto-update Charm libraries
+permissions: {}
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 0"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update-libs:
+    name: Update libraries
+    uses: canonical/observability/.github/workflows/charm-update-libs.yaml@v1
+    permissions:
+      contents: write # to create branches
+      pull-requests: write # to create pull requests for minor updates
+      issues: write # to create issues for major updates
+    secrets:
+      CHARMHUB_TOKEN: ${{ secrets.CHARMHUB_TOKEN }}
+      OBSERVABILITY_NOCTUA_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      NOCTUA_GPG_PRIVATE: ${{ secrets.BOT_GPG_PRIVATE }}
+      NOCTUA_GPG_PASSPHRASE: ${{ secrets.BOT_GPG_PASSPHRASE }}
+    with:
+      commit-username: Canonical-Certification-Bot
+      commit-email: solutions-qa@lists.canonical.com
