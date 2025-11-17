@@ -1,81 +1,47 @@
 # Conserver Charm
 
-A Juju charm that deploys and manages [conserver](https://www.conserver.com/), a serial console management server. Conserver allows multiple users to watch a serial console at the same time.
+[![Charmhub][charmhub-badge]][charmhub-site]
 
-## Configuration
+**Conserver Charm** is a charm that deploys and manages **[conserver]**, a
+serial console management server. Conserver allows multiple users to watch a
+serial console at the same time.
 
-The charm provides two main configuration options:
+## Basic Usage
 
-### config-file
+Conserver Charm is available on all major Linux distributions.
 
-The content for the main conserver configuration file (`/etc/conserver/conserver.cf`). This file defines:
-- Console access permissions
-- Console device settings
-- Logging configurations
-- Server behavior settings
+On [Juju-ready][juju] systems, you can deploy it on the command-line with:
 
-The contents of this file must be base64 encoded before passing it to the charm.
-
-Example configuration (see conserver documentation for more details):
-```
-config * {
-}
-default full {
-  rw *;
-}
-default * {
-  logfile /var/log/conserver/console.log;
-  timestamp "1lab %Y-%m-%d %H:%M:%S";
-}
-##
-## list of clients we allow/trust
-##
-access * {
-  # trusted 10.0.0.2;
-  allowed 10.0.0.2;
-}
-##
-## list of consoles we serve
-##
-console ttyS0 {
-    master localhost;
-    device /dev/ttyS0;
-    baud 9600;
-    options local;
-}
-
-console ipmi-host {
-        master localhost;
-        type exec;
-        exec (ipmitool -I lanplus -H 10.1.1.11 -U admin -P password sol deactivate || : && ipmitool -I lanplus -H 10.1.1.11 -U admin -P insecure sol activate);
-}
-```
-
-### passwd-file
-
-The content for the conserver password file (`/etc/conserver/conserver.passwd`), which must be base64 encoded. This file controls user access to consoles.
-
-Example (You can use `openssl passwd -1` to generate the password hash):
-```
-admin:$1$iexQAX66$09labjDCDgh4hrxRXgD/r1
-```
-
-## Usage
-
-Deploy the charm:
-```bash
+```shell
 juju deploy conserver
 ```
 
-**Note**: The charm will automatically deploy the `conserver-server` apt package, and configure it to start on boot, but it will fail to come up with the initial configuration since no connections are configured in conserver.cf by default. You'll need to configure the charm as described in this document before it can be used.
+> [!NOTE]
+> The charm automatically enables the `conserver-server` deb package,
+> but you have to configure the charm to add connections, credentials, etc in order to properly start the service.
 
-Configure with your settings:
-```bash
+Then configure your deployment:
+
+```shell
 juju config conserver config-file="$(cat your-conserver.cf | base64 -w0)"
 juju config conserver passwd-file="$(cat your-conserver.passwd | base64 -w0)"
 ```
 
-## More Information
+## Configuration
 
-- [Conserver Documentation](https://www.conserver.com/)
-- [Juju SDK Documentation](https://juju.is/docs/sdk)
+- `config-file`: The **base64 encoded** contents for the conserver configuration
+  file (i.e., `conserver.cf`). This file defines console access permissions,
+  console device settings, logging configurations, server behavior settings, etc.
+  Refer to the [`conserver.cf` documentation][conserver.cf] for more information.
+
+- `passwd-file`: The **base64 encoded** contents for the conserver password file
+  (i.e., `conserver.passwd`). This file controls user access to consoles.
+  Refer to the [`conserver.passwd` documentation][conserver.passwd] for more
+  information.
+
+[charmhub-badge]: https://charmhub.io/conserver/badge.svg
+[charmhub-site]: https://charmhub.io/conserver
+[conserver]: https://conserver.com/
+[juju]: https://canonical.com/juju
+[conserver.cf]: https://conserver.com/docs/conserver.cf.man.html
+[conserver.passwd]: https://conserver.com/docs/conserver.passwd.man.html
