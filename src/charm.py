@@ -12,7 +12,7 @@ import subprocess
 from pathlib import Path
 
 import ops
-from charms.operator_libs_linux.v0 import apt
+from charmlibs import apt
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +25,8 @@ class ConserverCharm(ops.CharmBase):
 
     def __init__(self, framework: ops.Framework):
         super().__init__(framework)
+        self.conserver_deb = apt.DebianPackage.from_system("conserver-server")
+        self.ipmitool_deb = apt.DebianPackage.from_system("ipmitool")
         self.framework.observe(self.on.install, self._on_install)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
         self.framework.observe(self.on.start, self._on_start)
@@ -32,7 +34,8 @@ class ConserverCharm(ops.CharmBase):
     def _on_install(self, _):
         """Handle install event."""
         self.unit.status = ops.MaintenanceStatus("Installing conserver-server")
-        self.install_apt_packages(["conserver-server", "ipmitool"])
+        self.conserver_deb.ensure(apt.PackageState.Latest)
+        self.ipmitool_deb.ensure(apt.PackageState.Latest)
 
         # Keep default port for incoming connections at 3109
         # and set base port for established connections at 33000
@@ -43,20 +46,6 @@ class ConserverCharm(ops.CharmBase):
             logger.error("Failed to write server.conf: %s", str(e))
             self.unit.status = ops.BlockedStatus("Failed to write server.conf")
             return
-
-    def install_apt_packages(self, packages: list):
-        """Perform 'apt-get install -y."""
-        try:
-            apt.update()
-            apt.add_package(packages)
-        except apt.PackageNotFoundError:
-            logger.error(
-                "a specified package not found in package cache or on system"
-            )
-            self.unit.status = ops.BlockedStatus("Failed to install packages")
-        except apt.PackageError:
-            logger.error("could not install package")
-            self.unit.status = ops.BlockedStatus("Failed to install packages")
 
     def _on_config_changed(self, _):
         """Handle changes in configuration."""
