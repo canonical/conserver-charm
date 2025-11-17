@@ -17,8 +17,8 @@ juju deploy conserver
 ```
 
 > [!NOTE]
-> The charm automatically enables and starts the `conserver-server` deb package,
-> but you have to configure the charm to add connections, credentials, etc.
+> The charm automatically enables the `conserver-server` deb package,
+> but you have to configure the charm to add connections, credentials, etc in order to properly start the service.
 
 Then configure your deployment:
 
