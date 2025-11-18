@@ -30,4 +30,5 @@ variable "config_file" {
 variable "passwd_file" {
   description = "Base64 encoded content for the conserver.passwd file"
   type        = string
+  sensitive   = true
 }
