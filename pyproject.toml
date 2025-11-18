@@ -1,3 +1,24 @@
+[project]
+name = "conserver-charm"
+version = "0.0.1"
+requires-python = ">=3.10"
+readme = "README.md"
+license = "apache-2.0"
+license-files = ["LICENSE"]
+
+# Dependencies of the charm code
+# You should include the dependencies of the code in src/. You should also include the
+# dependencies of any charmlibs that the charm uses (copy the dependencies from PYDEPS).
+dependencies = ["ops>=2.8,<3", "charmlibs-apt>=1.0,<2"]
+
+[dependency-groups]
+# Dependencies of linting and static type checks
+lint = ["ruff", "codespell", "pyright"]
+# Dependencies of unit tests
+unit = ["coverage[toml]", "ops[testing]", "pytest"]
+# Dependencies of integration tests
+integration = ["jubilant", "pytest", "PyYAML"]
+
 # Testing tools configuration
 [tool.coverage.run]
 branch = true
@@ -14,6 +35,8 @@ log_cli_level = "INFO"
 line-length = 99
 lint.select = ["E", "W", "F", "C", "N", "D", "I001"]
 lint.extend-ignore = [
+    "D105",
+    "D107",
     "D203",
     "D204",
     "D213",
@@ -26,9 +49,8 @@ lint.extend-ignore = [
     "D409",
     "D413",
 ]
-lint.ignore = ["E501", "D107"]
 extend-exclude = ["__pycache__", "*.egg_info"]
-lint.per-file-ignores = {"tests/*" = ["D100","D101","D102","D103","D104"]}
+lint.per-file-ignores = { "tests/*" = ["D100", "D101", "D102", "D103", "D104"] }
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
@@ -37,4 +59,5 @@ max-complexity = 10
 skip = "build,lib,venv,icon.svg,.tox,.git,.mypy_cache,.ruff_cache,.coverage"
 
 [tool.pyright]
-include = ["src/**.py"]
+extraPaths = ["lib"]
+include = ["src", "tests"]
