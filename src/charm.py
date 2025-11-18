@@ -5,17 +5,20 @@
 """Charm the application."""
 
 import base64
+import binascii
 import logging
 import os
 import pwd
-import subprocess
 from pathlib import Path
+from typing import Optional, cast
 
 import ops
 from charmlibs import apt
+from charms.operator_libs_linux.v1 import systemd
 
 logger = logging.getLogger(__name__)
 
+SERVER_CONFIG = "/etc/conserver/server.conf"
 CONSERVER_CONFIG = "/etc/conserver/conserver.cf"
 CONSERVER_PASSWD = "/etc/conserver/conserver.passwd"
 
@@ -30,6 +33,29 @@ class ConserverCharm(ops.CharmBase):
         self.framework.observe(self.on.install, self._on_install)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
         self.framework.observe(self.on.start, self._on_start)
+        self.framework.observe(self.on.stop, self._on_stop)
+
+    @property
+    def conserver_cf(self) -> Optional[str]:
+        """Return the conserver configuration from Juju config options, if any."""
+        if contents := cast(str, self.config.get("config-file")):
+            try:
+                return base64.b64decode(contents).decode("utf-8")
+            except binascii.Error as e:
+                logger.exception("Failed to decode config-file content: %s", e)
+                return None
+        return None
+
+    @property
+    def conserver_passwd(self) -> Optional[str]:
+        """Return the conserver password file from Juju config options, if any."""
+        if contents := cast(str, self.config.get("passwd-file")):
+            try:
+                return base64.b64decode(contents).decode("utf-8")
+            except binascii.Error as e:
+                logger.exception("Failed to decode passwd-file content: %s", e)
+                return None
+        return None
 
     def _on_install(self, _):
         """Handle install event."""
@@ -41,77 +67,95 @@ class ConserverCharm(ops.CharmBase):
         # and set base port for established connections at 33000
         server_config = "OPTS='-p 3109 -b 33000  '\nASROOT=\n"
         try:
-            Path("/etc/conserver/server.conf").write_text(server_config)
-        except Exception as e:
-            logger.error("Failed to write server.conf: %s", str(e))
+            Path(SERVER_CONFIG).write_text(server_config, encoding="utf-8")
+        except (OSError, UnicodeError) as e:
+            logger.exception("Failed to write server.conf: %s", e)
             self.unit.status = ops.BlockedStatus("Failed to write server.conf")
-            return
 
     def _on_config_changed(self, _):
         """Handle changes in configuration."""
         self.unit.status = ops.MaintenanceStatus("Updating configuration")
 
-        try:
-            # Update conserver.cf
-            config_content = self.config["config-file"]
-            try:
-                decoded_config = base64.b64decode(config_content).decode(
-                    "utf-8"
-                )
-            except Exception as e:
-                logger.error(f"Failed to decode config-file content: {e}")
-                self.unit.status = ops.BlockedStatus(
-                    "Invalid base64 in config-file"
-                )
-                return
-            Path(CONSERVER_CONFIG).write_text(decoded_config)
+        conserver_cf = self.conserver_cf
+        if conserver_cf:
+            self._write_file(conserver_cf, Path(CONSERVER_CONFIG))
 
-            # Update conserver.passwd
-            passwd_content = self.config["passwd-file"]
-            try:
-                decoded_passwd = base64.b64decode(passwd_content).decode(
-                    "utf-8"
-                )
-            except Exception as e:
-                logger.error(f"Failed to decode passwd-file content: {e}")
-                self.unit.status = ops.BlockedStatus(
-                    "Invalid base64 in passwd-file"
-                )
-                return
-
-            Path(CONSERVER_PASSWD).write_text(decoded_passwd)
-
-            # conserver.cf should be owned by root:root
-            os.chown(CONSERVER_CONFIG, 0, 0)
-            os.chmod(CONSERVER_CONFIG, 0o644)
-
-            # conserver.passwd should be owned by conservr:root
-            conservr_uid = pwd.getpwnam("conservr").pw_uid
-            os.chown(CONSERVER_PASSWD, conservr_uid, 0)
-            os.chmod(CONSERVER_PASSWD, 0o600)
-
-            # Restart service to apply changes
-            subprocess.check_call(["systemctl", "restart", "conserver-server"])
-
-        except Exception as e:
-            logger.error(f"Failed to update configuration: {e}")
-            self.unit.status = ops.BlockedStatus(
-                f"Failed to update configuration: {str(e)}"
+        conserver_passwd = self.conserver_passwd
+        if conserver_passwd:
+            self._write_file(
+                conserver_passwd,
+                Path(CONSERVER_PASSWD),
+                uid=pwd.getpwnam("conservr").pw_uid,
+                mode=0o600,
             )
-            return
 
-        self.unit.status = ops.ActiveStatus()
+        # Restart service to apply changes
+        try:
+            systemd.service_reload("conserver-server", restart_on_failure=True)
+            logger.info("Reloaded Conserver service successfully")
+        except systemd.SystemdError as e:
+            logger.exception("Failed to reload Conserver service: %s", e)
+        self.set_status()
 
     def _on_start(self, _):
         """Handle start event."""
         try:
-            # Ensure service is running
-            subprocess.check_call(
-                ["systemctl", "is-active", "--quiet", "conserver-server"]
-            )
+            systemd.service_enable("--now", "conserver-server")
+            logger.info("Enabled and started Conserver service successfully")
+        except systemd.SystemdError as e:
+            logger.exception("Failed to enable/start Conserver service: %s", e)
+        self.set_status()
+
+    def _on_stop(self, _):
+        """Handle stop event."""
+        try:
+            systemd.service_disable("--now", "conserver-server")
+            logger.info("Disabled and stopped Conserver service successfully")
+        except systemd.SystemdError as e:
+            logger.exception("Failed to disable/stop Conserver service: %s", e)
+        self.conserver_deb.ensure(apt.PackageState.Absent)
+        self.ipmitool_deb.ensure(apt.PackageState.Absent)
+
+    def set_status(self):
+        """Calculate and set the unit status."""
+        config_file = self.config.get("config-file", "")
+        passwd_file = self.config.get("passwd-file", "")
+
+        if not config_file:
+            self.unit.status = ops.BlockedStatus("Missing config-file in config")
+            return
+        if config_file and self.conserver_cf is None:
+            self.unit.status = ops.BlockedStatus("Invalid value for config-file")
+            return
+
+        if not passwd_file:
+            self.unit.status = ops.BlockedStatus("Missing passwd-file in config")
+            return
+        if passwd_file and self.conserver_passwd is None:
+            self.unit.status = ops.BlockedStatus("Invalid value for passwd-file")
+            return
+
+        if systemd.service_running("conserver-server"):
             self.unit.status = ops.ActiveStatus()
-        except subprocess.CalledProcessError:
-            self.unit.status = ops.BlockedStatus("Service failed to start")
+        elif systemd.service_failed("conserver-server"):
+            self.unit.status = ops.BlockedStatus("Conserver service has failed")
+        else:
+            self.unit.status = ops.MaintenanceStatus()
+
+    def _write_file(
+        self, contents: str, path: Path, uid: int = 0, gid: int = 0, mode: int = 0o644
+    ):
+        """Write contents to a file."""
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(contents, encoding="utf-8")
+            logger.info("Wrote %s successfully", path.name)
+        except OSError as e:
+            logger.exception("Failed to write %s: %s", path.name, e)
+            return False
+        os.chown(path, uid, gid)
+        path.chmod(mode)
+        return True
 
 
 if __name__ == "__main__":  # pragma: nocover
