@@ -5,7 +5,7 @@ variable "app_name" {
 }
 
 variable "charm_channel" {
-  description = "Channel to use for the charm (e.g., 'latest/stable')"
+  description = "Channel of the charm"
   type        = string
   default     = "latest/stable"
 }
@@ -22,7 +22,7 @@ variable "constraints" {
 }
 
 variable "juju_model" {
-  description = "Name of the Juju model to deploy into"
+  description = "Reference to an existing model resource or data source for the model to deploy to"
   type        = string
 }
 
@@ -33,7 +33,7 @@ variable "passwd_file" {
 }
 
 variable "revision" {
-  description = "Revision number of the charm to use"
+  description = "Revision number of the charm"
   type        = number
   nullable    = true
   default     = null
