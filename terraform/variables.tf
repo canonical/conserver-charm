@@ -15,6 +15,13 @@ variable "charm_channel" {
   default     = "latest/stable"
 }
 
+variable "revision" {
+  description = "Revision number of the charm to use"
+  type        = number
+  nullable    = true
+  default     = null
+}
+
 variable "config_file" {
   description = "Base64 encoded content for the conserver.cf configuration file"
   type        = string
