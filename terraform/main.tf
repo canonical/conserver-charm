@@ -1,13 +1,14 @@
 resource "juju_application" "conserver" {
-  name  = "conserver"
-  model = var.juju_model
-
-  units = 1
+  name        = var.app_name
+  constraints = var.constraints
+  model       = var.juju_model
+  units       = 1
 
   charm {
-    name    = "conserver"
-    base    = "ubuntu@22.04"
-    channel = var.charm_channel
+    name     = "conserver"
+    base     = "ubuntu@22.04"
+    channel  = var.charm_channel
+    revision = var.revision
   }
 
   config = {
