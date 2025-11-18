@@ -16,11 +16,11 @@ This module requires a `juju` model to be available. Refer to the
 | Name          | Type   | Description                                 | Default       |
 | ------------- | ------ | ------------------------------------------- | ------------- |
 | app_name      | string | Name of the Juju application                | conserver     |
-| juju_model    | string | Name of the Juju model to deploy into       |               |
 | charm_channel | string | Channel to use for the charm                | latest/stable |
-| revision      | number | Revision to use for the charm               | null          |
 | config_file   | string | Base64 encoded contents of conserver.cf     |               |
+| juju_model    | string | Name of the Juju model to deploy into       |               |
 | passwd_file   | string | Base64 encoded contents of conserver.passwd |               |
+| revision      | number | Revision to use for the charm               | null          |
 
 ### Outputs
 
