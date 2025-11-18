@@ -1,5 +1,12 @@
 *.charm
+*.py[cod]
+__pycache__/
+build/
 venv/
 .venv/
 .ruff_cache/
 .mypy_cache/
+.tox/
+.coverage
+.idea
+.vscode/
