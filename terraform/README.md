@@ -13,14 +13,15 @@ This module requires a `juju` model to be available. Refer to the
 
 ### Inputs
 
-| Name          | Type   | Description                                 | Default       |
-| ------------- | ------ | ------------------------------------------- | ------------- |
-| app_name      | string | Name of the Juju application                | conserver     |
-| charm_channel | string | Channel to use for the charm                | latest/stable |
-| config_file   | string | Base64 encoded contents of conserver.cf     |               |
-| juju_model    | string | Name of the Juju model to deploy into       |               |
-| passwd_file   | string | Base64 encoded contents of conserver.passwd |               |
-| revision      | number | Revision to use for the charm               | null          |
+| Name          | Type   | Description                                     | Default       |
+| ------------- | ------ | ----------------------------------------------- | ------------- |
+| app_name      | string | Name of the Juju application                    | conserver     |
+| charm_channel | string | Channel to use for the charm                    | latest/stable |
+| config_file   | string | Base64 encoded contents of conserver.cf         |               |
+| constraints   | string | String listing constraints for this application | arch=amd64    |
+| juju_model    | string | Name of the Juju model to deploy into           |               |
+| passwd_file   | string | Base64 encoded contents of conserver.passwd     |               |
+| revision      | number | Revision to use for the charm                   | null          |
 
 ### Outputs
 

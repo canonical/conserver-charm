@@ -1,8 +1,8 @@
 resource "juju_application" "conserver" {
-  name  = var.app_name
-  model = var.juju_model
-
-  units = 1
+  name        = var.app_name
+  constraints = var.constraints
+  model       = var.juju_model
+  units       = 1
 
   charm {
     name     = "conserver"

@@ -15,6 +15,12 @@ variable "config_file" {
   type        = string
 }
 
+variable "constraints" {
+  description = "String listing constraints for this application"
+  type        = string
+  default     = "arch=amd64"
+}
+
 variable "juju_model" {
   description = "Name of the Juju model to deploy into"
   type        = string
