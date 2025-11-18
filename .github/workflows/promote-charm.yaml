@@ -1,0 +1,30 @@
+name: Promote conserver charm
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      destination-channel:
+        description: Destination channel
+        required: true
+        default: latest/stable
+      origin-channel:
+        description: Origin channel
+        required: true
+        default: latest/edge
+
+jobs:
+  promote-charm:
+    name: Promote Charm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Promote
+        uses: canonical/charming-actions/promote-charm@2.7.0
+        with:
+          credentials: ${{ secrets.CHARMHUB_TOKEN }}
+          destination-channel: ${{ github.event.inputs.destination-channel }}
+          origin-channel: ${{ github.event.inputs.origin-channel }}
