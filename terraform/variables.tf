@@ -10,7 +10,7 @@ variable "charm_channel" {
 }
 
 variable "config_file" {
-  description = "Content for the conserver.cf configuration file"
+  description = "Base64 encoded content for the conserver.cf configuration file"
   type        = string
 }
 
