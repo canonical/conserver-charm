@@ -1,6 +1,8 @@
 # Conserver Charm
 
 [![Charmhub][charmhub-badge]][charmhub-site]
+[![uv status][uv-badge]][uv-site]
+[![Ruff status][ruff-badge]][ruff-site]
 
 **Conserver Charm** is a charm that deploys and manages **[conserver]**, a
 serial console management server. Conserver allows multiple users to watch a
@@ -41,6 +43,10 @@ juju config conserver passwd-file="$(cat your-conserver.passwd | base64 -w0)"
 
 [charmhub-badge]: https://charmhub.io/conserver/badge.svg
 [charmhub-site]: https://charmhub.io/conserver
+[uv-badge]: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json
+[uv-site]: https://github.com/astral-sh/uv
+[ruff-badge]: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
+[ruff-site]: https://github.com/astral-sh/ruff
 [conserver]: https://conserver.com/
 [juju]: https://canonical.com/juju
 [conserver.cf]: https://conserver.com/docs/conserver.cf.man.html

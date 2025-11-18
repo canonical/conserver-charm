@@ -6,7 +6,7 @@ on:
       - lib/**
       - src/**
       - charmcraft.yaml
-      - requirements.txt
+      - pyproject.toml
   workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
