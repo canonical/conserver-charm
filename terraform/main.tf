@@ -1,5 +1,5 @@
 resource "juju_application" "conserver" {
-  name  = "conserver"
+  name  = var.app_name
   model = var.juju_model
 
   units = 1

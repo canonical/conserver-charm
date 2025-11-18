@@ -1,3 +1,9 @@
+variable "app_name" {
+  description = "Name to give the deployed application"
+  type        = string
+  default     = "conserver"
+}
+
 variable "juju_model" {
   description = "Name of the Juju model to deploy into"
   type        = string
