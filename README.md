@@ -42,6 +42,22 @@ juju config conserver passwd-file="$(cat your-conserver.passwd | base64 -w0)"
   Refer to the [`conserver.passwd` documentation][conserver.passwd] for more
   information.
 
+## Community and Support
+
+You can report any issues, bugs, or feature requests on the project's [GitHub repository][github].
+
+## Contribute to Conserver Charm
+
+The Conserver Charm is open source. Contributions are welcome.
+
+If you are interested, start with the [contribution guide](CONTRIBUTING.md).
+
+## License and Copyright
+
+The Conserver Charm is released under the [Apache-2.0 license](LICENSE).
+
+© 2025 Canonical Ltd.
+
 [charmhub-badge]: https://charmhub.io/conserver/badge.svg
 [charmhub-site]: https://charmhub.io/conserver
 [test-badge]: https://github.com/canonical/conserver-charm/actions/workflows/test.yaml/badge.svg
@@ -54,3 +70,4 @@ juju config conserver passwd-file="$(cat your-conserver.passwd | base64 -w0)"
 [juju]: https://canonical.com/juju
 [conserver.cf]: https://conserver.com/docs/conserver.cf.man.html
 [conserver.passwd]: https://conserver.com/docs/conserver.passwd.man.html
+[github]: https://github.com/canonical/conserver-charm
