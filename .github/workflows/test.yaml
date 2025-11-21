@@ -1,0 +1,89 @@
+name: Test
+permissions:
+  contents: read
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lockfile:
+    name: Check uv.lock
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Set up uv
+        uses: astral-sh/setup-uv@5a7eac68fb9809dea845d802897dc5c723910fa3 # v7.1.3
+      - name: Check uv.lock
+        run: uv lock --check
+  check-libs:
+    if: github.event_name == 'pull_request'
+    name: Check Charm Libraries
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # required to label PR based on results
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Check libraries
+        uses: canonical/charming-actions/check-libraries@2.7.0
+        with:
+          credentials: ${{ secrets.CHARMHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Set up uv
+        uses: astral-sh/setup-uv@5a7eac68fb9809dea845d802897dc5c723910fa3 # v7.1.3
+      - name: Install dependencies
+        run: uv sync --group=lint
+      - name: Lint
+        run: uvx tox run -e lint
+  unit:
+    name: Unit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Set up uv
+        uses: astral-sh/setup-uv@5a7eac68fb9809dea845d802897dc5c723910fa3 # v7.1.3
+      - name: Install dependencies
+        run: uv sync --group=unit
+      - name: Run unit tests
+        run: uvx tox run -e unit
+  integration:
+    name: Integration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Set up uv
+        uses: astral-sh/setup-uv@5a7eac68fb9809dea845d802897dc5c723910fa3 # v7.1.3
+      - name: Install concierge
+        run: sudo snap install --classic concierge
+      - name: Prepare Juju
+        run: sudo concierge prepare --verbose --juju-channel=3/stable --charmcraft-channel=latest/stable -p machine
+      - name: Pack charm
+        run: charmcraft pack --verbose
+      - name: Install dependencies
+        run: uv sync --group=integration
+      - name: Run integration tests
+        run: uvx tox run -e integration
