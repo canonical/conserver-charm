@@ -1,6 +1,7 @@
 # Conserver Charm
 
 [![Charmhub][charmhub-badge]][charmhub-site]
+[![Test][test-badge]][test-site]
 [![uv status][uv-badge]][uv-site]
 [![Ruff status][ruff-badge]][ruff-site]
 
@@ -43,6 +44,8 @@ juju config conserver passwd-file="$(cat your-conserver.passwd | base64 -w0)"
 
 [charmhub-badge]: https://charmhub.io/conserver/badge.svg
 [charmhub-site]: https://charmhub.io/conserver
+[test-badge]: https://github.com/canonical/conserver-charm/actions/workflows/test.yaml/badge.svg
+[test-site]: https://github.com/canonical/conserver-charm/actions/workflows/test.yaml
 [uv-badge]: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json
 [uv-site]: https://github.com/astral-sh/uv
 [ruff-badge]: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
