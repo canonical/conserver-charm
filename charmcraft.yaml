@@ -19,6 +19,10 @@ charm-libs:
   - lib: operator_libs_linux.systemd
     version: "1"
 
+provides:
+  conserver:
+    interface: conserver_client
+
 config:
   options:
     config-file:
