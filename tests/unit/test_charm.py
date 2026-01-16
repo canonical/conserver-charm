@@ -71,6 +71,7 @@ def test_config_missing_passwd_file(conserver_mock: MagicMock, config_file: str)
 @patch("charm.Conserver")
 def test_start(conserver_mock: MagicMock, config_file: str):
     """Test that the charm has the correct state after handling the start event."""
+    conserver_mock.return_value.version = "8.2.6"
     conserver_mock.return_value.running = True
     ctx = testing.Context(ConserverCharm)
     state_in = testing.State(
@@ -79,11 +80,13 @@ def test_start(conserver_mock: MagicMock, config_file: str):
     )
     state_out = ctx.run(ctx.on.start(), state_in)
     assert isinstance(state_out.unit_status, testing.ActiveStatus)
+    assert state_out.workload_version == "8.2.6"
 
 
 @patch("charm.Conserver")
 def test_start_failed_service(conserver_mock: MagicMock, config_file: str):
     """Test that the charm is blocked when the service has failed."""
+    conserver_mock.return_value.version = "8.2.6"
     conserver_mock.return_value.running = False
     conserver_mock.return_value.failed = True
     ctx = testing.Context(ConserverCharm)
@@ -98,6 +101,7 @@ def test_start_failed_service(conserver_mock: MagicMock, config_file: str):
 @patch("charm.Conserver")
 def test_start_maintenance(conserver_mock: MagicMock, config_file: str):
     """Test that the charm is in maintenance when the service is not running nor failed."""
+    conserver_mock.return_value.version = "8.2.6"
     conserver_mock.return_value.running = False
     conserver_mock.return_value.failed = False
     ctx = testing.Context(ConserverCharm)
