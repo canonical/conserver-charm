@@ -13,8 +13,7 @@ from pathlib import Path
 from typing import Optional, cast
 
 import ops
-from charmlibs import apt
-from charms.operator_libs_linux.v1 import systemd
+from charmlibs import apt, systemd
 
 logger = logging.getLogger(__name__)
 
