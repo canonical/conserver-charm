@@ -2,6 +2,7 @@
 
 [![Charmhub][charmhub-badge]][charmhub-site]
 [![Test][test-badge]][test-site]
+[![codecov][cov-badge]][cov-latest]
 [![uv status][uv-badge]][uv-site]
 [![Ruff status][ruff-badge]][ruff-site]
 
@@ -62,6 +63,8 @@ The Conserver Charm is released under the [Apache-2.0 license](LICENSE).
 [charmhub-site]: https://charmhub.io/conserver
 [test-badge]: https://github.com/canonical/conserver-charm/actions/workflows/test.yaml/badge.svg
 [test-site]: https://github.com/canonical/conserver-charm/actions/workflows/test.yaml
+[cov-badge]: https://codecov.io/gh/canonical/conserver-charm/graph/badge.svg?token=pHXnFPq6z1
+[cov-latest]: https://codecov.io/gh/canonical/conserver-charm
 [uv-badge]: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json
 [uv-site]: https://github.com/astral-sh/uv
 [ruff-badge]: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
