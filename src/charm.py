@@ -73,6 +73,7 @@ class ConserverCharm(ops.CharmBase):
     def _on_start(self, _):
         """Handle start event."""
         self.conserver.start(ignore_errors=True)
+        self.unit.set_workload_version(self.conserver.version)
         self.set_status()
 
     def _on_stop(self, _):
