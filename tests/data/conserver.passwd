@@ -1,0 +1,3 @@
+# Conserver passwd file
+# Format: username:$1$Y0ZjMm2h$oMX5UyLi1/y0Q9IRWf3v/0
+# you can generate the hashed password using `openssl passwd -1`
