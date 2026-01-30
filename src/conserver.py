@@ -35,10 +35,7 @@ class Conserver:
     @property
     def version(self) -> str:
         """Get the installed version of conserver."""
-        proc = subprocess.run(
-            ["conserver", "-V"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
-        stdout = proc.stdout.decode().strip()
+        stdout = subprocess.check_output(["conserver", "-V"], text=True).strip()
         match = re.search(r"conserver.com version (\S+)", stdout)
         if match:
             return match.group(1)
