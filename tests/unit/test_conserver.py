@@ -8,22 +8,20 @@ from charmlibs import apt, systemd
 from conserver import CONSERVER_SERVICE, Conserver
 
 
-@patch("conserver.subprocess.run")
+@patch("conserver.subprocess.check_output")
 @patch("conserver.apt.DebianPackage.from_system")
-def test_version(from_system_mock: MagicMock, subprocess_run_mock: MagicMock):
+def test_version(from_system_mock: MagicMock, check_output_mock: MagicMock):
     """Test that version property returns correct value."""
-    subprocess_run_mock.return_value = MagicMock(
-        stdout=b"conserver: conserver.com version 8.2.6\n", returncode=0
-    )
+    check_output_mock.return_value = "conserver: conserver.com version 8.2.6\n"
     conserver = Conserver()
     assert conserver.version == "8.2.6"
 
 
-@patch("conserver.subprocess.run")
+@patch("conserver.subprocess.check_output")
 @patch("conserver.apt.DebianPackage.from_system")
-def test_version_unknown(from_system_mock: MagicMock, subprocess_run_mock: MagicMock):
+def test_version_unknown(from_system_mock: MagicMock, check_output_mock: MagicMock):
     """Test that version property returns 'unknown' when version cannot be determined."""
-    subprocess_run_mock.return_value = MagicMock(stdout=b"unexpected output", returncode=0)
+    check_output_mock.return_value = "unexpected output"
     conserver = Conserver()
     assert conserver.version == "unknown"
 

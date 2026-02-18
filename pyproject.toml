@@ -13,6 +13,7 @@ dependencies = [
     "ops>=3.4,<4",
     "charmlibs-apt>=1.0,<2",
     "charmlibs-systemd>=1.0,<2",
+    "pydantic>=2.12,<3",
 ]
 
 [dependency-groups]

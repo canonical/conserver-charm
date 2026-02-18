@@ -1,7 +1,9 @@
 import logging
 from unittest.mock import MagicMock, patch
 
+import pytest
 from ops import testing
+from ops.testing import errors
 
 from charm import ConserverCharm
 
@@ -16,8 +18,9 @@ def test_invalid_base64_config_file(conserver_mock: MagicMock):
         config={"config-file": "invalid-base64"},
         leader=True,
     )
-    state_out = ctx.run(ctx.on.config_changed(), state_in)
-    assert isinstance(state_out.unit_status, testing.BlockedStatus)
+    with pytest.raises(errors.UncaughtCharmError):
+        state_out = ctx.run(ctx.on.config_changed(), state_in)
+        assert isinstance(state_out.unit_status, testing.BlockedStatus)
 
 
 @patch("charm.Conserver")
@@ -31,15 +34,16 @@ def test_invalid_base64_passwd_file(conserver_mock: MagicMock, config_file: str)
         },
         leader=True,
     )
-    state_out = ctx.run(ctx.on.config_changed(), state_in)
-    assert isinstance(state_out.unit_status, testing.BlockedStatus)
+    with pytest.raises(errors.UncaughtCharmError):
+        state_out = ctx.run(ctx.on.config_changed(), state_in)
+        assert isinstance(state_out.unit_status, testing.BlockedStatus)
 
 
 @patch("charm.Conserver")
-def test_install(conserver_mock: MagicMock):
+def test_install(conserver_mock: MagicMock, config_file: str):
     """Test that the charm installs conserver on install event."""
     ctx = testing.Context(ConserverCharm)
-    state_in = testing.State(leader=True)
+    state_in = testing.State(config={"config-file": config_file}, leader=True)
     ctx.run(ctx.on.install(), state_in)
     conserver_mock.return_value.install.assert_called_once()
 

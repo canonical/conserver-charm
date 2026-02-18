@@ -29,4 +29,8 @@ parts:
   conserver-charm:
     plugin: uv
     source: .
-    build-snaps: [astral-uv]
+    build-snaps: [astral-uv, rustup]
+    override-build: |
+      rustup set profile minimal
+      rustup default stable
+      craftctl default
