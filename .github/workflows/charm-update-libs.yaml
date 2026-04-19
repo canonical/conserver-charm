@@ -11,7 +11,7 @@ concurrency:
 jobs:
   update-libs:
     name: Update libraries
-    uses: canonical/observability/.github/workflows/charm-update-libs.yaml@v1
+    uses: canonical/observability/.github/workflows/charm-update-libs.yaml@v2
     permissions:
       contents: write # to create branches
       pull-requests: write # to create pull requests for minor updates
