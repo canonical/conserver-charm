@@ -34,3 +34,12 @@ parts:
       rustup set profile minimal
       rustup default stable
       craftctl default
+
+charm-libs:
+  - lib: grafana_agent.cos_agent
+    version: "0"
+
+provides:
+  cos-agent:
+    interface: cos_agent
+    limit: 1
