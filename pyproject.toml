@@ -14,6 +14,7 @@ dependencies = [
     "charmlibs-apt>=1.0,<2",
     "charmlibs-systemd>=1.0,<2",
     "pydantic>=2.12,<3",
+    "cosl>=1.9.1",
 ]
 
 [dependency-groups]
@@ -54,8 +55,8 @@ lint.extend-ignore = [
     "D409",
     "D413",
 ]
-extend-exclude = ["__pycache__", "*.egg_info"]
 lint.per-file-ignores = { "tests/*" = ["D100", "D101", "D102", "D103", "D104"] }
+extend-exclude = ["__pycache__", "*.egg_info"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10

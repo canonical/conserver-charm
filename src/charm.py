@@ -8,6 +8,7 @@ import logging
 
 import ops
 
+from charms.grafana_agent.v0.cos_agent import COSAgentProvider
 from config import ConserverConfig
 from conserver import Conserver
 
@@ -25,6 +26,8 @@ class ConserverCharm(ops.CharmBase):
         self.framework.observe(self.on.config_changed, self._on_config_changed)
         self.framework.observe(self.on.start, self._on_start)
         self.framework.observe(self.on.stop, self._on_stop)
+
+        self._grafana_agent = COSAgentProvider(self)
 
     def _on_install(self, _):
         """Handle install event."""
